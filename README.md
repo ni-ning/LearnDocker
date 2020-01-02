@@ -1,8 +1,73 @@
+# Docker
+
+### 基本概念
+
+**NameSpace 资源隔离**
+- PID 进程编号
+- NET 网络设备、网络协议栈、端口等
+- IPC 信号量、消息队列、共享内存
+- MOUNT 文件系统、挂载点
+- UTS 主机名和主机域
+- USER 操作进程的用户和用户组
+
+```
+Build Once, Run Anywhere
+               -- Solomon Hykes
+```
+
+**What is Docker 是什么**
+- Docker基于容器技术的轻量级虚拟化解决方案
+- Docker是容器引擎，把Linux的cgroup、namespace等容器底层技术进行封装抽象为用户提供了创建和管理容器的便捷界面(包括命令行和API)
+- Docker 开源项目，基于Google公司推出的Go语言实现
+- Docker引入了一整套容器管理的生态，包括分层的镜像模型、容器注册库、友好的Rest API
 
 
-### docker image --help
+### 安装与基本命令
 
-docker image rm redis
+- 安装 [Ubuntu for Docker CE](https://docs.docker.com/install/linux/docker-ce/ubuntu/)
+- [建立 docker 用户组](https://yeasy.gitbooks.io/docker_practice/install/ubuntu.html)
+
+```
+
+vim /etc/docker/daemon.json
+{
+    "graph": "/data/docker",
+    "storage-driver": "overlay2",
+    "insequre-registries": [],
+    "registry-mirrors": [],
+    "bip": "172.7.5.1/24",
+    "exec-opts": ["native.cgroupdriver=systemd"],
+    "live-restore": true
+}
+
+systemctl enable docker
+systemctl start docker
+
+docker info
+docker run hello-world
+
+docker login
+docker logout
+cat /home/ubuntu/.docker/config.json
+
+docker search alpine
+docker pull alpine:latest
+docker images | grep alpine
+# docker tag SOURCE_IMAGE[:TAG] TARGET_IMAGE[:TAG]
+docker tag apline:latest nining1314/apline:v1.0
+docker push nining1314/alpine:v1.0
+
+docker rmi ${image_id} | docker rmi ${image_name}
+```
+
+
+
+### 镜像
+
+Docker 镜像特性
+
+
+`docker image rm redis`
 ```
 容器是以镜像为基础，再加一层存储层，组成这样的多层存储结构去运行 -> 检查镜像的容器(即使容器没有运行)，存在时则不可删除镜像
 
@@ -49,3 +114,7 @@ docker exec [OPTIONS] CONTAINER COMMAND [ARG...]
 
 
 ### docker volume --help
+
+
+
+# Docker Compose
