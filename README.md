@@ -174,7 +174,7 @@ PWD=/
 **镜像制作的途径**
 - docker commit
 - Dockerfile
-
+![dockerfile](https://raw.githubusercontent.com/ni-ning/LearnDocker/master/images/dockerfile.png)
 
 **Dockerfile的规则**
 - '# 为注释
