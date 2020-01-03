@@ -69,10 +69,13 @@ docker save <image_name|image_id> > specify_name.tar
 docker load -i specify_name.tar
 ```
 
+容器、镜像与仓库
+![registry](https://raw.githubusercontent.com/ni-ning/LearnDocker/master/images/structure.png)
+
 ### 镜像
 
 Docker 镜像特性
-
+![image](https://raw.githubusercontent.com/ni-ning/LearnDocker/master/images/bootfs.png)
 
 `docker image rm redis`
 ```
