@@ -25,10 +25,13 @@ Build Once, Run Anywhere
 ### 安装与基本命令
 
 - 安装 [Ubuntu for Docker CE](https://docs.docker.com/install/linux/docker-ce/ubuntu/)
-- [建立 docker 用户组](https://yeasy.gitbooks.io/docker_practice/install/ubuntu.html)
 
-```
+```bash
+# 建立 docker 组，并将当前用户加入 docker 组，退出当前终端并重新登录
+sudo groupadd docker
+sudo useradd -aG docker $USER
 
+# 添加 docker 配置(可选)
 vim /etc/docker/daemon.json
 {
     "graph": "/data/docker",
@@ -40,16 +43,20 @@ vim /etc/docker/daemon.json
     "live-restore": true
 }
 
+# 开机启动 docker 服务
 systemctl enable docker
 systemctl start docker
 
+# docker 基于 C/S 架构，自己分析流程细节
 docker info
 docker run hello-world
 
+# 访问 docker.io
 docker login
 docker logout
 cat /home/ubuntu/.docker/config.json
 
+# 镜像的拉取与推送
 docker search alpine
 docker pull alpine:latest
 docker images | grep alpine
@@ -57,10 +64,10 @@ docker images | grep alpine
 docker tag apline:latest nining1314/apline:v1.0
 docker push nining1314/alpine:v1.0
 
-docker rmi ${image_id} | docker rmi ${image_name}
+# 镜像与 tar 包
+docker save <image_name|image_id> > specify_name.tar
+docker load -i specify_name.tar
 ```
-
-
 
 ### 镜像
 
@@ -76,7 +83,7 @@ Docker 镜像特性
 镜像是多层存储结构 -> 从上层向基础层方向依次进行判断删除
 ```
 
-### docker container --help
+### 容器
 
 当利用 docker run 来创建容器时，Docker 在后台运行的标准操作包括：
 
@@ -88,20 +95,40 @@ Docker 镜像特性
 - 执行用户指定的应用程序
 - 执行完毕后容器被终止
 
-**关键点：**
+**关键点**
 
 - 容器的核心为所执行的应用程序，所需的资源都是应用程序所必须的
 - 容器是否会长久运行，是和 docker run 指定的命令有关，和 -d 参数无关
 - 当 Docker 容器中指定的应用终结时，容器也自动终止
 
-**进入容器:**
+**容器基本操作**
 
 ```
-docker run -dit ubuntu
+# 查询启动的容器
+docker ps -a
+或者
 docker container ls
 
-docker attach 1ac38db98x  --> exit
-docker exec -it 1ac38db98x bash  --> exit
+# docker run 日常最频繁的使用命令之一, 启动容器
+# docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
+docker run -it --rm --name my-alpine alpine /bin/sh
+docker run -d my-alpine alpine /bin/sleep 1000
+
+# 进入容器
+docker attach <container_id>
+docker exec -it <container_id> /bin/bash
+
+# 启动/停止(不是暂停)/重启容器
+docker start/stop/restart <container_id>
+
+# 启动的容器更新之后，固化为镜像
+docker commit -p <CONTAINER> [REPOSITORY[:TAG]]
+
+# 删除容器
+docker container rm [-f] <container_id>
+
+# 查看日志
+docker logs [-f] <container_id>
 ```
 
 docker attach CONTAINER
@@ -112,9 +139,68 @@ docker exec [OPTIONS] CONTAINER COMMAND [ARG...]
 - Run a command in a running container
 - 从这个 stdin 中 exit，不会导致容器的停止
 
+**容器高级操作**
 
-### docker volume --help
+映射端口
+- docker run -p 容器外端口:容器内端口
+```
+# 启动 nginx
+docker run --rm -d -p 81:80 nginx
+```
+挂载数据卷
+- docker run -v 容器外目录:容器内目录
+```
+wget www.baidu.com -O index.html
+docker run --rm -d -p 82:80  -v /home/ubuntu/code/website:/usr/share/nginx/html nginx
+```
+传递环境变量
+- docker run -e 环境变量key=环境变量value
+```
+docker run --rm -d --name my-nginx -p 83:80 -e E_VAL=123 nginx
+docker exec -it my-nginx /bin/bash
 
+>>> root@d50cfa7d8bfc:/# printenv
+E_VAL=123
+HOSTNAME=d50cfa7d8bfc
+PWD=/
+```
+容器内安装软件(工具)
+- yum/apt-get/apk 等
 
+### Dockfile
+待续
 
 # Docker Compose
+
+待续
+
+# Kubernetes
+
+待续
+
+# 启动常用镜像
+
+### alpine
+```
+docker run -it --rm alpine /bin/sh
+```
+
+### rabbitmq
+```
+docker run -d  --rm --name rabbitmq  \
+-p 5672:5672 \
+-p 5671:5671 \
+-p 4369:4369 \
+-p  25672:25672 \
+rabbitmq
+```
+
+### redis
+```
+docker run -d --rm --name redis -p 6379:6379 redis:alpine
+```
+
+
+# 扩展阅读
+
+- [Docker - 从入门到实践](https://yeasy.gitbooks.io/docker_practice/)
