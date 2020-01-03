@@ -171,7 +171,99 @@ PWD=/
 - yum/apt-get/apk 等
 
 ### Dockfile
-待续
+**镜像制作的途径**
+- docker commit
+- Dockerfile
+
+
+**Dockerfile的规则**
+- '# 为注释
+- 指令(大写) 内容(小写)，尽管大小写不敏感，规范
+- Docker是按顺序执行Dockerfile里的指令集合的(从上到下依次执行)
+- 每一个Dockerfile的第一个非注释指令，必须是 FROM 指令，用于为镜像文件构建过程中，指定基准镜像，后续得指令运行于此基准镜像所提供的运行环境中
+
+常用指令 USER/WORKDIR
+```
+# Dockfile 文件
+FROM nining1314/nginx:v1.12.2
+USER nginx
+WORKDIR /usr/share/nginx/html
+
+docker build . -t nining1314/nginx:v1.12.2_USER_WORKDIR
+```
+
+常用指令 ADD/EXPORSE
+```
+# Dockfile 文件
+FROM nining1314/nginx:v1.12.2
+ADD index.html /usr/share/nginx/html/index.html
+# 容器内部预计开启的端口
+EXPOSE 80
+
+docker build . -t nining1314/nginx:v1.12.2_ADD_EXPOSE
+```
+
+常用指令 ENV/RUN
+```
+# Dockfile 文件
+FROM centos:7
+ENV VERSION 7.58.0
+# 在打包制作竟像时执行的命令
+RUN yum install curl-$VERSION
+
+docker build . -t nining1314/centos:7_ENV_RUN
+```
+
+常用指令 CMD/ENTRYPOINT
+```
+# Dockfile 文件
+FROM centos:7
+# 在打包制作竟像时执行的命令
+RUN yum install httpd -y
+# 启动镜像时执行的命令
+CMD ["httpd", "-D", "FOREGROUND"]
+
+docker build . -t nining1314/centos:7_CMD
+
+
+# Dockfile 文件
+FROM centos:7
+ADD entrypoint.sh /entrypoint.sh
+RUN yum install nginx -y
+# 启动镜像时执行的脚本
+ENTRYPOINT /entrypoint.sh
+
+docker build . -t nining1314/centos:7_ENTRYPOINT
+```
+
+### Docker的网络模型
+- NAT(默认)
+```
+docker run -it --rm alpine /bin/sh
+/ # ip addr -> 容器内部地址
+/ # exit
+
+ip addr -> docker0 宿主机地址
+```
+
+- None
+```
+# 如只需计算任务，无需网络
+docker run -it --rm --net=none alpine
+```
+
+- Host
+```
+docker run -it --rm --net=host alpine
+```
+
+- 联合网络 **
+```
+docker run -d nining1314/nginx:v1.12.2
+docker ps -a
+# 两个容器共享一个IP，很神奇
+docker run -it --rm --net=container:<container_id> nining1314/nginx:v.1.12.2
+```
 
 # Docker Compose
 
